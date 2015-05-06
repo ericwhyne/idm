@@ -59,3 +59,16 @@ target/
 
 # Project specific
 *.ini
+bin/
+include/
+lib/
+local/
+output/
+input/
+*.sw?
+*.sh
+*.out
+*.txt
+*.csv
+*.conf
+*.bak
