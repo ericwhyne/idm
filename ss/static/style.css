@@ -1,0 +1,44 @@
+body {
+
+background: rgba(45,88,133,1);
+}
+
+h1 {
+    padding: 5px;
+    color: white;
+}
+
+h2, p, label {
+    padding: 5px;
+    color: navy;
+}
+
+#header-panel {
+    background-color: navy;
+    float:top;
+}
+
+#centered-panel {
+    background-color: lightgrey;
+    position:absolute;
+    width:600px;
+    height:600px;
+    z-index:15;
+    top:50%;
+    left:50%;
+    margin:-300px 0 0 -300px;
+    border: 5px solid navy;
+    padding: 15px;
+}
+
+#error-panel {
+    width:50%;
+    height:auto;
+    position:relative;
+    margin:0 auto;
+}
+
+table.center {
+    margin-left:auto; 
+    margin-right:auto;
+}

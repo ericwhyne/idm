@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="/idm/ss/static/style.css" />
+</head>
+<body>
+     <div id="header-panel"><h1>Recover Password</h1></div>
+     <div id="centered-panel">
+         <img src="/idm/ss/static/images/success.png" alt="Success" style="width:30px;height:30px"><br>
+         <p>A password recovery email has been sent to you. This email will contain a web link to be used to reset your forgotten password. If you do not receive the email within a few minutes, you may try again or contact the system administrators.</p>
+         <p>{{ content }}</p>
+     </div>
+</body>
+</html>
+

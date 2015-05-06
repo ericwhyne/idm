@@ -68,7 +68,6 @@ input/
 *.sw?
 *.sh
 *.out
-*.txt
 *.csv
 *.conf
 *.bak

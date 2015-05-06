@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="/idm/ss/static/style.css" />
+
+<!--
+<style>
+body  {
+    background-image: url("static/images/duckfiles.gif");
+    background-color: #cccccc;
+}
+</style>
+-->
+</head>
+<body>
+    <div id="header-panel"><h1>Recover Password</h1></div>
+    <div id="centered-panel">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div>
+        <table class="center">
+        {% for field in form %}
+        <tr>
+            <td>{{ field.label_tag }}<td><td> {{ field }} </td> <td> {{ field.errors.as_text }} </td>
+        </tr>
+        {% endfor %}
+        </table>
+        </div>
+        <div style="text-align: center;">
+            <input type="submit" value="Submit" />
+        </div>
+    </form>
+    <div id="error-panel">
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+                <strong>{{ error }}</strong>
+            {% endfor %}
+        {% endif %}
+    </div>
+    </div>
+</body>
+</html>
