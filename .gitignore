@@ -71,3 +71,4 @@ input/
 *.csv
 *.conf
 *.bak
+*.pyc

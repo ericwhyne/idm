@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import django
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -115,13 +117,13 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/django/idm/debug.log',
+            'filename': BASE_DIR + '/debug.log',
             'formatter': 'simple'
         },
         'error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/django/idm/error.log',
+            'filename': BASE_DIR + '/error.log',
             'formatter': 'simple'
         },
     },
