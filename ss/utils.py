@@ -19,10 +19,18 @@ recovery_log = os.path.join(os.path.dirname(__file__),'password_recovery.log')
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
 
 def set_token(host, admin, cred, dn, user):
+    """
+    Using the connection parameters and username, this function sets a unique token for the LDAP user.  This token will be used, in part, to verify the user requested a password recovery.
+    :param host: hostname of the LDAP directory service
+    :param admin: username of the administrator that has permission to update a user record in the LDAP to set the token
+    :param cred: password of the admin user
+    :param dn: root search DN
+    :param user: username (typically, uid)
+    """
+
     try:
         ldap.set_option(ldap.OPT_DEBUG_LEVEL,255)
         url = 'ldaps://%s:636' % host
-        #url = 'ldap://%s:389' % host
 	l = ldap.initialize(url)
         log.debug("***Connecting to %s as %s %s" % (url,admin,cred))
         l.simple_bind_s(admin, cred)
@@ -33,13 +41,11 @@ def set_token(host, admin, cred, dn, user):
         email = ''
         token = ''
 
-        #while 1:
         # The result set should only have a single, valid entry or none
 	result_type, result_data = l.result(id,1)
 	if (result_data == []):
 	    raise ldap.LDAPError('%s not a valid user' % user)
         else:
-	    #if result_type == ldap.RES_SEARCH_ENTRY:
 	    log.debug(result_data)
 	    record=result_data[0][1]
 	    userdn = result_data[0][0]
@@ -73,9 +79,19 @@ def set_token(host, admin, cred, dn, user):
         raise e
 
 def reset_passwd_by_token(host, admin, cred, dn, user, token, passwd):
+    """
+    This function validates the token, sets the user's password temporarily, and binds as the user to perform a proper password change as the user
+    :param host: hostname of the LDAP directory service
+    :param admin: username of the administrator that has permission to update a user record in the LDAP to set the token
+    :param cred: password of the admin user
+    :param dn: root search DN
+    :param user: username (typically, uid)
+    :param token: token provided to the user (by email)
+    :param passwd: new password supplied by user
+    """
+
     try:
         url = 'ldaps://%s:636' % host
-        #url = 'ldap://%s:389' % host
 	l = ldap.initialize(url)
         l.simple_bind_s(admin, cred)
         filter='uid=%s' % user
@@ -131,8 +147,6 @@ def reset_passwd_by_token(host, admin, cred, dn, user, token, passwd):
 
         l.unbind_s()
     
-        # RLJ - not sure if this is the problem with Insuficient Rights error, but adding a delay
-        # time.sleep(10)
         # Login as user with new, temporary password and set password
         if temp_password_set:
             userconn = ldap.initialize(url)
@@ -148,8 +162,16 @@ def reset_passwd_by_token(host, admin, cred, dn, user, token, passwd):
 
 
 def change_password(host, dn, username, old, new):
+    """
+    This function changes a users password from old to new.
+    :param host: hostname of the LDAP directory service
+    :param dn: root search DN
+    :param username: username (typically, uid)
+    :param old: old password
+    :param new: new password
+    """
+
     ldap_url = 'ldaps://%s:636' % host
-    #ldap_url = 'ldap://%s:389' % host
     try:
         userdn = get_userdn(host, dn, username)
         log.debug('userdn = %s' % userdn)
@@ -166,6 +188,9 @@ def change_password(host, dn, username, old, new):
         raise e
 
 def send_email(server, port, local_hostname, username, password, to_addr, from_addr, subject, message):
+    """
+    Utility function to send an email.
+    """
     msg = email.MIMEMultipart.MIMEMultipart()
     msg['From'] = from_addr
     msg['To'] = to_addr
@@ -179,6 +204,11 @@ def send_email(server, port, local_hostname, username, password, to_addr, from_a
     server.quit()
 
 def record_recovery_status(user, status):
+    """
+    This function records the status of a user's password recovery.
+    :param user: user that requested recovery
+    :param status: status of the recovery request
+    """
     with open(recovery_log, 'ab') as recovery_log_file:
        wr = csv.writer(recovery_log_file, quoting=csv.QUOTE_MINIMAL) 
        tformat = '%Y-%m-%d %H:%M:%SZ'
@@ -186,10 +216,14 @@ def record_recovery_status(user, status):
        wr.writerow([now, user, status])
 
 def get_userdn(host, dn, userid):
-    '''Get the user's dn anonomously, will not work if ldap will not allow
-       anonymous searches.'''
+    """
+    Get the user's dn anonomously, will not work if ldap will not allow anonymous searches.
+    param host: LDAP host
+    param dn: search DN
+    param userid: userid
+    return: if found, the user's DN
+    """
     ldap_url = 'ldaps://%s:636' % host
-    #ldap_url = 'ldap://%s:389' % host
     try:
         log.debug('Connecting to %s' % ldap_url)
         l = ldap.initialize(ldap_url)

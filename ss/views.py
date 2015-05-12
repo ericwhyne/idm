@@ -41,78 +41,11 @@ log = logging.getLogger(__name__)
 def index(request):
     return render(request, 'ss/recover.html', {})
 
-def post_upload(request):
-    if request.method == 'GET':
-        return render(request, 'ss/upload.html', {})
-    elif request.method == 'POST':
-        #post = m.Post.objects.create(content=request.POST['content'], created_at=datetime.utcnow())
-        # No need to call post.save() at this point -- it's already saved.
-        #return HttpResponseRedirect(reverse('index', kwargs={'post_id': post.id}))
-        #return HttpResponseRedirect(reverse('index'))
-    	content = request.POST['content']
-        return render(request, 'ss/success.html', {'content': content})
-        #return HttpResponse({'content':request.POST['content']})
-
-
-def by_email(request):
-    class PasswordRecoveryForm(forms.Form):
-        username = forms.CharField(label='Enter your username:')
-
-    if request.method == 'GET':
-            form = PasswordRecoveryForm()    
-	    return render(request, 'ss/recover.html', {'form': form})
-
-    elif request.method == 'POST':
-            form = PasswordRecoveryForm(request.POST)    
-    
-	    try:
-		l = ldap.open("127.0.0.1")
-	    
-		# you should  set this to ldap.VERSION2 if you're using a v2 directory
-		l.protocol_version = ldap.VERSION3    
-		# Pass in a valid username and password to get 
-		# privileged directory access.
-		# If you leave them as empty strings or pass an invalid value
-		# you will still bind to the server but with limited privileges.
-	    
-		username = "cn=Directory Manager"
-		password  = "1qaz@WSX"
-	    
-		# Any errors will throw an ldap.LDAPError exception 
-		# or related exception so you can ignore the result
-		l.simple_bind(username, password)
-
-		## The next lines will also need to be changed to support your search requirements and directory
-		baseDN = "cn=users, cn=accounts, dc=example, dc=com"
-		searchScope = ldap.SCOPE_SUBTREE
-		## retrieve all attributes - again adjust to your needs - see documentation for more options
-		retrieveAttributes = None 
-		searchFilter = "uid=bubbaj"
-
-		ldap_result_id = l.search(baseDN, searchScope, searchFilter, retrieveAttributes)
-		result_set = []
-		while 1:
-		    result_type, result_data = l.result(ldap_result_id, 0)
-		    if (result_data == []):
-			break
-		    else:
-			## here you don't have to append to a list
-			## you could do whatever you want with the individual entry
-			## The appending to list is just for illustration. 
-			if result_type == ldap.RES_SEARCH_ENTRY:
-			    result_set.append(result_data)
-		    print result_set 
-	    except ldap.LDAPError, e:
-		print e
-		# handle error however you like
-
-	    content = 'test'
-
-	    if form.is_valid():
-		return render(request, 'ss/success.html', {'content': content})
-
 
 def send_recovery_email(request):
+"""
+This function generates an email with a URL link that allows the user to perform a password recovery and reset.
+"""
     class PasswordRecoveryForm(forms.Form):
         username = forms.CharField(label='Enter your username:', validators=[RegexValidator('^[a-zA-Z0-9]*$', message='Invalid username', code='invalid_username')])
 
@@ -138,6 +71,9 @@ def send_recovery_email(request):
              
                 #basepath = '/'.join(pathparts) 
                 #baseurl = '%s://%s/%s' % (urlparts.scheme, urlparts.netloc, basepath)
+                # RLJ TODO, hardcoded the https since behind a proxy with only 
+                # https, need to learn how to interrogate the request to learn
+                # if behind proxy.
                 message = '''
 A request to recover your password has been received.
 If you did not request this, please contact the administrators of the system.
@@ -156,6 +92,9 @@ https://%s%s/%s/
     return render(request, 'ss/recover.html', {'form': form})
  
 def reset_password(request, token):
+"""
+Using the unique token supplied, this function allows the user to set his/her password without knowing their previous password.  Between the token and valid username, the user will be able to set his/her password.
+"""
     class ResetPasswordForm(forms.Form):
         username = forms.CharField(label='Enter your username:', validators=[RegexValidator('^[a-zA-Z0-9]*$', message='Invalid username', code='invalid_username')])
         passwd  = forms.CharField(label='New Password:', widget=forms.PasswordInput)
@@ -214,6 +153,9 @@ def reset_password(request, token):
     return render(request, 'ss/recover.html', {'form': form})
         
 def change_password(request):
+"""
+This function changes the user's password using user inputs of username, current password, and new password with confirmation.
+"""
     class ChangePasswordForm(forms.Form):
         username = forms.CharField(label='Enter your username:', validators=[RegexValidator('^[a-zA-Z0-9]*$', message='Invalid username', code='invalid_username')])
         old_passwd  = forms.CharField(label='Current Password:', widget=forms.PasswordInput)
