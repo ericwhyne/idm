@@ -7,12 +7,13 @@ import email
 import csv
 import time
 import os
+import random, string
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 timeformat = '%Y%m%d%H%MZ'
-tmp_password = 'T3mpPassw0rd'
+tmp_password = ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
 token_attr = 'employeeNumber'
 recovery_log = os.path.join(os.path.dirname(__file__),'password_recovery.log')
 
